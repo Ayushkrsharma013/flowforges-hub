@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/prospecting-os/:path*",
+      "destination": "https://lead-engine.vercel.app/prospecting-os/:path*"
+    }
+  ]
+}

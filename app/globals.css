@@ -1,27 +1,57 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:            #000000;
+  --surface:       #0A0A0A;
+  --surface-2:     #0E0E0E;
+  --surface-elev:  #141414;
+  --line:          rgba(255,255,255,.06);
+  --line-strong:   rgba(255,255,255,.12);
+  --ink:           #EBEBEB;
+  --ink-2:         #B0B0B0;
+  --ink-3:         #808080;
+  --ink-4:         #555555;
+  --accent:        #E8A840;
+  --accent-soft:   rgba(232,168,64,.12);
+  --accent-ink:    #F0C060;
+  --positive:      #6BCB77;
+  --negative:      #E06060;
+  --shadow-sm:     0 1px 2px rgba(0,0,0,0.6);
+  --shadow-md:     0 4px 12px rgba(0,0,0,0.55);
+  --shadow-lg:     0 12px 32px rgba(0,0,0,0.65);
+
+  /* Per-app accents */
+  --pros-accent:   #e8420a;
+  --pros-glow:     rgba(232,66,10,0.15);
+  --support-accent:#3b82f6;
+  --content-accent:#14b8a6;
+  --proposal-accent:#8b5cf6;
+  --reputation-accent:#f59e0b;
+  --sow-accent:    #ec4899;
+
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(237,234,226,0.08); border-radius: 4px; }
+
+::selection { background: var(--accent-soft); color: var(--ink); }
