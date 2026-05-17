@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/prospecting-os",
+      "destination": "https://lead-engine-svix-workspace.vercel.app/prospecting-os"
+    },
+    {
+      "source": "/prospecting-os/",
+      "destination": "https://lead-engine-svix-workspace.vercel.app/prospecting-os/"
+    },
+    {
       "source": "/prospecting-os/:path*",
       "destination": "https://lead-engine-svix-workspace.vercel.app/prospecting-os/:path*"
     }
