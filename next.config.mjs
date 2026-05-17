@@ -5,7 +5,7 @@ const nextConfig = {
       beforeFiles: [
         {
           source: '/prospecting-os/:path*',
-          destination: `${process.env.LEAD_ENGINE_URL || 'https://lead-engine.vercel.app'}/prospecting-os/:path*`,
+          destination: `${process.env.LEAD_ENGINE_URL || 'https://lead-engine-svix-workspace.vercel.app'}/prospecting-os/:path*`,
         },
       ],
     };
