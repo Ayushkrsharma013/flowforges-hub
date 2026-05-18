@@ -14,15 +14,15 @@
     },
     {
       "source": "/mailflow",
-      "destination": "https://mailflow.vercel.app/mailflow"
+      "destination": "https://mailflow-swart.vercel.app/mailflow"
     },
     {
       "source": "/mailflow/",
-      "destination": "https://mailflow.vercel.app/mailflow/"
+      "destination": "https://mailflow-swart.vercel.app/mailflow/"
     },
     {
       "source": "/mailflow/:path*",
-      "destination": "https://mailflow.vercel.app/mailflow/:path*"
+      "destination": "https://mailflow-swart.vercel.app/mailflow/:path*"
     }
   ]
 }
