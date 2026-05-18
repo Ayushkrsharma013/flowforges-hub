@@ -11,6 +11,18 @@
     {
       "source": "/prospecting-os/:path*",
       "destination": "https://lead-engine-svix-workspace.vercel.app/prospecting-os/:path*"
+    },
+    {
+      "source": "/mailflow",
+      "destination": "https://mailflow.vercel.app/mailflow"
+    },
+    {
+      "source": "/mailflow/",
+      "destination": "https://mailflow.vercel.app/mailflow/"
+    },
+    {
+      "source": "/mailflow/:path*",
+      "destination": "https://mailflow.vercel.app/mailflow/:path*"
     }
   ]
 }
