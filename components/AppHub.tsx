@@ -1,9 +1,9 @@
 'use client'
-import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion'
+import { motion, useScroll, useSpring } from 'framer-motion'
 import { useState } from 'react'
 import {
   Target, Headphones, PenLine, FileText, Star, ClipboardList,
-  Bolt, Mail, Wrench, ArrowRight
+  Bolt, Mail, Wrench, ArrowRight,
 } from 'lucide-react'
 
 interface AppDef {
@@ -71,301 +71,435 @@ const APPS: AppDef[] = [
 const STATUS_CONFIG = {
   live:        { label: 'Live',        color: 'var(--positive)', bg: 'rgba(107,203,119,0.10)', border: 'rgba(107,203,119,0.25)' },
   beta:        { label: 'Beta',        color: '#3b82f6',        bg: 'rgba(59,130,246,0.10)',  border: 'rgba(59,130,246,0.25)' },
-  coming_soon: { label: 'Coming soon', color: 'var(--accent)',  bg: 'var(--accent-soft)',    border: 'rgba(232,168,64,0.30)' },
-  planned:     { label: 'Planned',     color: 'var(--ink-3)',   bg: 'rgba(128,128,128,0.08)', border: 'var(--line-strong)' },
+  coming_soon: { label: 'Coming soon', color: 'var(--accent)',  bg: 'var(--accent-soft)',    border: 'rgba(232,168,64,0.28)' },
+  planned:     { label: 'Planned',     color: 'var(--ink-3)',   bg: 'rgba(128,128,128,0.07)', border: 'var(--line-strong)' },
 }
 
-function getGreeting(): string {
+const SECTIONS = [
+  { key: 'live' as const,        title: 'Live Now',          meta: 'Production-ready · Activate any time' },
+  { key: 'coming_soon' as const, title: 'In Development',    meta: 'Active build · ETA Q3 2026' },
+  { key: 'planned' as const,     title: 'On the Roadmap',    meta: 'Scoped · Starting Q4 2026' },
+]
+
+function getGreeting() {
   const h = new Date().getHours()
   if (h < 12) return 'Good morning'
   if (h < 17) return 'Good afternoon'
   return 'Good evening'
 }
 
+function AppCard({ app, index }: { app: AppDef; index: number }) {
+  const [hovered, setHovered] = useState(false)
+  const status = STATUS_CONFIG[app.status]
+  const isLive = app.status === 'live'
+  const Icon = app.icon
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-30px' }}
+      transition={{ duration: 0.45, delay: index * 0.055, ease: [0.22, 1, 0.36, 1] }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      whileHover={isLive
+        ? { y: -4, transition: { type: 'spring', stiffness: 340, damping: 22 } }
+        : { y: -1, transition: { duration: 0.2 } }
+      }
+      style={{
+        background: 'var(--surface)',
+        border: `1px solid ${hovered && isLive ? 'rgba(255,255,255,0.08)' : 'var(--line)'}`,
+        borderRadius: 14,
+        overflow: 'hidden',
+        cursor: isLive ? 'pointer' : 'default',
+        position: 'relative',
+        opacity: app.status === 'planned' ? 0.58 : 1,
+        transition: 'border-color 0.2s ease, opacity 0.2s ease',
+        display: 'flex', flexDirection: 'column',
+      }}
+    >
+      {/* Accent strip */}
+      <div style={{
+        height: 2.5,
+        background: isLive
+          ? `linear-gradient(90deg, ${app.accentColor} 0%, ${app.accentColor}40 60%, transparent 100%)`
+          : `linear-gradient(90deg, rgba(255,255,255,0.07) 0%, transparent 100%)`,
+        transition: 'opacity 0.3s',
+        opacity: hovered ? 1 : 0.75,
+        flexShrink: 0,
+      }} />
+
+      {/* App glow */}
+      {isLive && (
+        <div style={{
+          position: 'absolute', top: -24, right: -24,
+          width: 110, height: 110, borderRadius: '50%',
+          background: app.glowColor, filter: 'blur(38px)',
+          pointerEvents: 'none',
+          opacity: hovered ? 0.9 : 0.18,
+          transition: 'opacity 0.35s ease',
+        }} />
+      )}
+
+      <div style={{ padding: '20px 20px 20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+        {/* Header row */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div style={{
+            width: 38, height: 38, borderRadius: 9,
+            background: `${app.accentColor}14`,
+            border: `1px solid ${app.accentColor}22`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: app.accentColor, flexShrink: 0,
+          }}>
+            <Icon size={17} />
+          </div>
+
+          <span style={{
+            fontSize: 9.5, fontWeight: 600, letterSpacing: '0.05em',
+            padding: '3.5px 8px', borderRadius: 999,
+            background: status.bg, color: status.color,
+            border: `1px solid ${status.border}`,
+            fontFamily: 'Geist Mono, monospace',
+            display: 'flex', alignItems: 'center', gap: 5,
+          }}>
+            {isLive && (
+              <motion.span
+                animate={{ scale: [1, 1.5, 1], opacity: [1, 0.35, 1] }}
+                transition={{ duration: 2.4, repeat: Infinity }}
+                style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--positive)', display: 'inline-block' }}
+              />
+            )}
+            {status.label}
+          </span>
+        </div>
+
+        {/* Name, tagline, description */}
+        <h3 style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--ink)', marginBottom: 3, letterSpacing: '-0.015em', lineHeight: 1.3 }}>
+          {app.name}
+        </h3>
+        <p style={{ fontSize: 10.5, fontWeight: 500, color: app.accentColor, fontFamily: 'Geist Mono, monospace', marginBottom: 9, opacity: 0.9, letterSpacing: '0.01em' }}>
+          {app.tagline}
+        </p>
+        <p style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.65, marginBottom: 14 }}>
+          {app.description}
+        </p>
+
+        {/* Module tags */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: app.stats ? 16 : 18 }}>
+          {app.modules.slice(0, 4).map(mod => (
+            <span key={mod} style={{
+              fontSize: 9, padding: '3px 7px', borderRadius: 999,
+              background: 'var(--surface-elev)', border: '1px solid var(--line)',
+              color: 'var(--ink-3)', letterSpacing: '0.02em',
+            }}>
+              {mod}
+            </span>
+          ))}
+          {app.modules.length > 4 && (
+            <span style={{ fontSize: 9, padding: '3px 6px', color: 'var(--ink-4)' }}>
+              +{app.modules.length - 4}
+            </span>
+          )}
+        </div>
+
+        {/* Stats grid (live apps only) */}
+        {app.stats && (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${app.stats.length}, 1fr)`,
+            gap: 1, marginBottom: 16,
+            background: 'var(--line)', borderRadius: 9, overflow: 'hidden',
+          }}>
+            {app.stats.map(stat => (
+              <div key={stat.label} style={{
+                padding: '9px 10px', background: 'var(--surface-elev)', textAlign: 'center',
+              }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)', marginBottom: 1, lineHeight: 1 }}>{stat.value}</p>
+                <p style={{ fontSize: 8.5, color: 'var(--ink-4)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Spacer to push CTA to bottom */}
+        <div style={{ flex: 1 }} />
+
+        {/* CTA */}
+        {isLive ? (
+          <motion.a
+            href={app.url}
+            whileHover={{ scale: 1.015 }}
+            whileTap={{ scale: 0.975 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 24 }}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              padding: '10px 0', borderRadius: 9,
+              background: `${app.accentColor}18`,
+              border: `1px solid ${app.accentColor}35`,
+              color: app.accentColor,
+              fontSize: 12, fontWeight: 600,
+              textDecoration: 'none', letterSpacing: '-0.01em',
+              transition: 'background 0.2s ease',
+            }}>
+            Launch {app.name} <ArrowRight size={12} />
+          </motion.a>
+        ) : (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+            padding: '10px 0', borderRadius: 9,
+            border: '1px solid var(--line)', color: 'var(--ink-4)', fontSize: 11.5,
+          }}>
+            <Wrench size={11} />
+            {app.status === 'coming_soon' ? 'In development' : 'On the roadmap'}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  )
+}
+
+function SectionLabel({ title, count, meta }: { title: string; count: number; meta: string }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      marginBottom: 18, paddingBottom: 14, borderBottom: '1px solid var(--line)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+        <h2 style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)', letterSpacing: '-0.01em' }}>{title}</h2>
+        <span style={{
+          fontSize: 9.5, fontWeight: 600, padding: '2px 7px', borderRadius: 999,
+          background: 'var(--surface-elev)', border: '1px solid var(--line)',
+          color: 'var(--ink-3)', fontFamily: 'Geist Mono, monospace',
+        }}>
+          {count}
+        </span>
+      </div>
+      <p style={{ fontSize: 10.5, color: 'var(--ink-4)', fontFamily: 'Geist Mono, monospace' }}>{meta}</p>
+    </div>
+  )
+}
+
 export function AppHub({ profile }: { profile: any }) {
-  const [hoveredApp, setHoveredApp] = useState<string | null>(null)
   const [filter, setFilter] = useState<'all' | 'live' | 'coming_soon' | 'planned'>('all')
   const { scrollYProgress } = useScroll()
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 })
 
-  const filtered = APPS.filter(a => filter === 'all' || a.status === filter)
   const displayName = profile?.display_name?.split(' ')[0] || profile?.email?.split('@')[0]
+
+  const visibleSections = SECTIONS.filter(s =>
+    filter === 'all' || filter === s.key
+  ).map(s => ({
+    ...s,
+    apps: APPS.filter(a => a.status === s.key),
+  })).filter(s => s.apps.length > 0)
 
   return (
     <div style={{ minHeight: '100vh', position: 'relative', zIndex: 1 }}>
+
+      {/* Ambient radial gradient */}
+      <div style={{
+        position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
+        background: 'radial-gradient(ellipse 1000px 500px at 50% 0%, rgba(232,168,64,0.035) 0%, transparent 70%)',
+      }} />
+
       {/* Scroll progress */}
       <motion.div style={{
         position: 'fixed', top: 0, left: 0, right: 0, height: 1.5,
-        background: 'var(--accent)', transformOrigin: 'left', scaleX, zIndex: 200,
+        background: 'linear-gradient(90deg, var(--accent), var(--accent-ink))',
+        transformOrigin: 'left', scaleX, zIndex: 200,
       }} />
 
-      {/* Top bar */}
+      {/* Header */}
       <motion.header
-        initial={{ opacity: 0, y: -12 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
         style={{
           position: 'sticky', top: 0, zIndex: 50,
-          background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
+          background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
           borderBottom: '1px solid var(--line)',
-          padding: '0 24px', height: 56,
+          padding: '0 28px', height: 52,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Bolt size={16} style={{ color: 'var(--accent)' }} />
-          <span className="font-bold text-[14px] tracking-tight" style={{ color: 'var(--ink)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{
+            width: 26, height: 26, borderRadius: 7,
+            background: 'linear-gradient(135deg, rgba(232,168,64,0.22), rgba(240,192,96,0.08))',
+            border: '1px solid rgba(232,168,64,0.18)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Bolt size={13} style={{ color: 'var(--accent)' }} />
+          </div>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', letterSpacing: '-0.02em' }}>
             FlowForges
           </span>
-          <span className="text-[11px] font-medium" style={{ color: 'var(--ink-4)', fontFamily: 'Geist Mono, monospace' }}>
-            / hub
-          </span>
+          <span style={{ fontSize: 12, color: 'var(--line-strong)', margin: '0 1px' }}>/</span>
+          <span style={{ fontSize: 11, color: 'var(--ink-4)', fontFamily: 'Geist Mono, monospace' }}>hub</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <a href="https://flow-forges.com" style={{ fontSize: 13, color: 'var(--ink-3)', textDecoration: 'none' }}>Main site</a>
-          <a href="/prospecting-os/book" style={{ fontSize: 13, color: 'var(--ink-3)', textDecoration: 'none' }}>Book a call</a>
+
+        <nav style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+          <a href="https://flow-forges.com" style={{ fontSize: 12, color: 'var(--ink-3)', textDecoration: 'none' }}>
+            Agency
+          </a>
+          <a href="/prospecting-os/book" style={{ fontSize: 12, color: 'var(--ink-3)', textDecoration: 'none' }}>
+            Book a call
+          </a>
           {profile ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div className="rounded-full flex items-center justify-center text-[11px] font-bold"
-                style={{ width: 28, height: 28, background: 'var(--accent-soft)', border: '1px solid rgba(232,168,64,0.25)', color: 'var(--accent)' }}>
-                {displayName?.[0]?.toUpperCase() || 'U'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <div style={{
+                width: 26, height: 26, borderRadius: '50%',
+                background: 'var(--accent-soft)', border: '1px solid rgba(232,168,64,0.22)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 10, fontWeight: 700, color: 'var(--accent)',
+              }}>
+                {displayName?.[0]?.toUpperCase() ?? 'U'}
               </div>
-              <span style={{ fontSize: 13, color: 'var(--ink-2)' }}>{displayName}</span>
+              <span style={{ fontSize: 12, color: 'var(--ink-2)' }}>{displayName}</span>
             </div>
           ) : (
-            <a href="/prospecting-os/login"
-              style={{ fontSize: 13, padding: '6px 16px', borderRadius: 9999, border: '1px solid var(--line)', color: 'var(--ink-2)', textDecoration: 'none' }}>
+            <a href="/prospecting-os/login" style={{
+              fontSize: 12, padding: '5px 14px', borderRadius: 999,
+              border: '1px solid var(--line)', color: 'var(--ink-2)', textDecoration: 'none',
+            }}>
               Sign in
             </a>
           )}
-        </div>
+        </nav>
       </motion.header>
 
       {/* Hero */}
-      <section style={{ padding: '72px 0 48px', textAlign: 'center' }}>
-        <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 24px' }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {/* Logo mark */}
-            <div className="rounded-xl flex items-center justify-center mx-auto"
-              style={{
-                width: 44, height: 44, marginBottom: 20,
-                background: 'linear-gradient(135deg, rgba(232,168,64,0.2), rgba(240,192,96,0.1))',
-                border: '1px solid rgba(232,168,64,0.15)',
-                boxShadow: '0 0 24px rgba(232,168,64,0.08)',
-              }}>
-              <Bolt size={20} style={{ color: 'var(--accent)' }} />
-            </div>
+      <section style={{ padding: '68px 0 44px', textAlign: 'center', position: 'relative' }}>
+        {/* Dot grid decoration */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden',
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+          maskImage: 'radial-gradient(ellipse 700px 300px at 50% 50%, black 0%, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 700px 300px at 50% 50%, black 0%, transparent 80%)',
+        }} />
 
-            <p className="font-bold uppercase tracking-[0.18em] mb-3"
-              style={{ fontSize: 11, color: 'var(--ink-4)', fontFamily: 'Geist Mono, monospace' }}>
-              FlowForges · App Hub
-            </p>
-
-            <h1 style={{
-              fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 600,
-              color: 'var(--ink)', lineHeight: 1.15, marginBottom: 14,
-              letterSpacing: '-0.02em',
+        <motion.div
+          style={{ maxWidth: 680, margin: '0 auto', padding: '0 24px', position: 'relative' }}
+          initial={{ opacity: 0, y: 22 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '5px 12px', borderRadius: 999, marginBottom: 22,
+            background: 'var(--accent-soft)', border: '1px solid rgba(232,168,64,0.2)',
+          }}>
+            <Bolt size={10} style={{ color: 'var(--accent)' }} />
+            <span style={{
+              fontSize: 10, fontWeight: 600, color: 'var(--accent-ink)',
+              fontFamily: 'Geist Mono, monospace', letterSpacing: '0.1em',
             }}>
-              {getGreeting()}{displayName ? `, ${displayName}` : ''}.{' '}
-              <span style={{ color: 'var(--ink-2)', fontWeight: 400 }}>
-                What are we building today?
-              </span>
-            </h1>
+              FLOWFORGES · APP HUB
+            </span>
+          </div>
 
-            <p style={{ fontSize: 14, color: 'var(--ink-3)', lineHeight: 1.7 }}>
-              {APPS.filter(a => a.status === 'live').length} live&ensp;·&ensp;
-              {APPS.filter(a => a.status === 'coming_soon').length} in development&ensp;·&ensp;
-              {APPS.filter(a => a.status === 'planned').length} planned
-            </p>
-          </motion.div>
-        </div>
+          <h1 style={{
+            fontSize: 'clamp(24px, 4vw, 38px)', fontWeight: 600,
+            color: 'var(--ink)', lineHeight: 1.18, marginBottom: 14,
+            letterSpacing: '-0.025em',
+          }}>
+            {getGreeting()}{displayName ? `, ${displayName}` : ''}.{' '}
+            <span style={{ color: 'var(--ink-3)', fontWeight: 400 }}>
+              Your AI workforce.
+            </span>
+          </h1>
+
+          <p style={{ fontSize: 13.5, color: 'var(--ink-3)', lineHeight: 1.7, marginBottom: 32, maxWidth: 480, margin: '0 auto 32px' }}>
+            A suite of AI-powered tools for B2B agencies. Each app handles an entire workflow autonomously.
+          </p>
+
+          {/* Inline counts */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 36, flexWrap: 'wrap' }}>
+            {[
+              { label: 'live', value: APPS.filter(a => a.status === 'live').length, color: 'var(--positive)' },
+              { label: 'in development', value: APPS.filter(a => a.status === 'coming_soon').length, color: 'var(--accent)' },
+              { label: 'planned', value: APPS.filter(a => a.status === 'planned').length, color: 'var(--ink-4)' },
+            ].map(s => (
+              <div key={s.label} style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                <span style={{ fontSize: 19, fontWeight: 700, color: s.color, letterSpacing: '-0.02em' }}>{s.value}</span>
+                <span style={{ fontSize: 11, color: 'var(--ink-4)' }}>{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       </section>
 
       {/* Filter pills */}
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 36px', display: 'flex', gap: 8 }}>
-        {(['all', 'live', 'coming_soon', 'planned'] as const).map(f => (
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 28px 36px', display: 'flex', gap: 6, justifyContent: 'center' }}>
+        {([
+          { key: 'all' as const, label: 'All apps' },
+          { key: 'live' as const, label: 'Live' },
+          { key: 'coming_soon' as const, label: 'In development' },
+          { key: 'planned' as const, label: 'Planned' },
+        ]).map(f => (
           <motion.button
-            key={f} onClick={() => setFilter(f)} whileTap={{ scale: 0.97 }}
-            className="text-[11px] font-medium px-3.5 py-1.5 rounded-full transition-all duration-200"
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            whileTap={{ scale: 0.96 }}
             style={{
-              background: filter === f ? 'var(--accent-soft)' : 'transparent',
-              color: filter === f ? 'var(--accent-ink)' : 'var(--ink-3)',
-              border: `1px solid ${filter === f ? 'rgba(232,168,64,0.25)' : 'var(--line)'}`,
-              cursor: 'pointer',
+              fontSize: 11, fontWeight: 500,
+              padding: '6px 16px', borderRadius: 999,
+              background: filter === f.key ? 'var(--accent-soft)' : 'transparent',
+              color: filter === f.key ? 'var(--accent-ink)' : 'var(--ink-3)',
+              border: `1px solid ${filter === f.key ? 'rgba(232,168,64,0.25)' : 'var(--line)'}`,
+              cursor: 'pointer', transition: 'all 0.15s ease',
             }}>
-            {f === 'all' ? 'All' : f === 'coming_soon' ? 'Coming soon' : f.charAt(0).toUpperCase() + f.slice(1)}
+            {f.label}
           </motion.button>
         ))}
       </div>
 
-      {/* Apps grid */}
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 96px' }}>
-        <motion.div
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}
-          variants={{ visible: { transition: { staggerChildren: 0.07 } } }}
-          initial="hidden" animate="visible"
-        >
-          <AnimatePresence mode="popLayout">
-            {filtered.map(app => {
-              const status = STATUS_CONFIG[app.status]
-              const isLive = app.status === 'live'
-              const isHovered = hoveredApp === app.id
-              const Icon = app.icon
+      {/* Sections */}
+      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '0 28px 100px' }}>
+        {visibleSections.map((section, si) => (
+          <motion.section
+            key={section.key}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: si * 0.05 }}
+            style={{ marginBottom: 52 }}
+          >
+            <SectionLabel title={section.title} count={section.apps.length} meta={section.meta} />
 
-              return (
-                <motion.div
-                  key={app.id} layout
-                  variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } } }}
-                  exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.2 } }}
-                  onMouseEnter={() => setHoveredApp(app.id)} onMouseLeave={() => setHoveredApp(null)}
-                  whileHover={isLive ? {
-                    y: -4,
-                    borderColor: 'rgba(232,168,64,0.25)',
-                    boxShadow: '0 0 40px rgba(232,168,64,0.06)',
-                    transition: { type: 'spring', stiffness: 350, damping: 22 },
-                  } : { y: -2 }}
-                  style={{
-                    background: 'var(--surface)',
-                    border: `1px solid ${isLive ? 'var(--line)' : 'var(--line)'}`,
-                    borderRadius: 16, padding: '26px 24px',
-                    cursor: isLive ? 'pointer' : 'default',
-                    position: 'relative', overflow: 'hidden',
-                    opacity: app.status === 'planned' ? 0.55 : 1,
-                  }}
-                >
-                  {/* Accent glow */}
-                  {isLive && (
-                    <div style={{
-                      position: 'absolute', top: -30, right: -30,
-                      width: 100, height: 100, borderRadius: '50%',
-                      background: app.glowColor, filter: 'blur(40px)',
-                      pointerEvents: 'none',
-                      opacity: isHovered ? 1 : 0.35,
-                      transition: 'opacity 0.4s',
-                    }} />
-                  )}
-
-                  {/* Header */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18 }}>
-                    <div className="rounded-xl flex items-center justify-center"
-                      style={{
-                        width: 40, height: 40, fontSize: 18,
-                        background: `${app.accentColor}12`, border: `1px solid ${app.accentColor}28`,
-                        color: app.accentColor,
-                      }}>
-                      <Icon size={19} />
-                    </div>
-                    <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5"
-                      style={{
-                        background: status.bg, color: status.color,
-                        border: `1px solid ${status.border}`,
-                        fontFamily: 'Geist Mono, monospace', letterSpacing: '0.05em',
-                      }}>
-                      {isLive && (
-                        <motion.span
-                          animate={{ scale: [1, 1.5, 1], opacity: [1, 0.4, 1] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                          style={{ width: 4, height: 4, borderRadius: '50%', background: status.color, display: 'inline-block' }}
-                        />
-                      )}
-                      {status.label}
-                    </span>
-                  </div>
-
-                  <h2 className="text-[16px] font-semibold mb-1 tracking-[-0.01em]" style={{ color: 'var(--ink)' }}>{app.name}</h2>
-                  <p className="text-[12px] font-medium mb-3" style={{ color: app.accentColor, fontFamily: 'Geist Mono, monospace' }}>{app.tagline}</p>
-                  <p className="text-[13px] mb-5 leading-relaxed" style={{ color: 'var(--ink-2)' }}>{app.description}</p>
-
-                  {/* Modules */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 22 }}>
-                    {app.modules.slice(0, 4).map(mod => (
-                      <span key={mod} className="text-[10px] px-2.5 py-1 rounded-full"
-                        style={{ background: 'var(--surface-2)', border: '1px solid var(--line)', color: 'var(--ink-3)' }}>
-                        {mod}
-                      </span>
-                    ))}
-                    {app.modules.length > 4 && (
-                      <span className="text-[10px] px-2.5 py-1 rounded-full" style={{ background: 'transparent', color: 'var(--ink-4)' }}>
-                        +{app.modules.length - 4}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Stats */}
-                  {app.stats && (
-                    <div style={{ display: 'flex', gap: 20, paddingTop: 16, marginBottom: 18, borderTop: '1px solid var(--line)' }}>
-                      {app.stats.map(stat => (
-                        <div key={stat.label}>
-                          <p className="text-[10px] mb-0.5 uppercase tracking-[0.06em]" style={{ color: 'var(--ink-4)' }}>{stat.label}</p>
-                          <p className="text-[13px] font-semibold" style={{ color: 'var(--ink)' }}>{stat.value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* CTA */}
-                  {isLive ? (
-                    <motion.a
-                      href={app.url}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-                      className="flex items-center justify-center gap-2 rounded-full text-[13px] font-semibold no-underline"
-                      style={{
-                        padding: '11px 0',
-                        background: 'var(--accent)',
-                        color: '#000',
-                        boxShadow: '0 0 20px rgba(232,168,64,0.12)',
-                      }}>
-                      Open {app.name} <ArrowRight size={14} />
-                    </motion.a>
-                  ) : (
-                    <div className="flex items-center justify-center gap-2 rounded-full text-[12px]"
-                      style={{ padding: '11px 0', border: '1px solid var(--line)', color: 'var(--ink-3)' }}>
-                      <Wrench size={12} />
-                      {app.status === 'coming_soon' ? 'In development' : 'On the roadmap'}
-                    </div>
-                  )}
-                </motion.div>
-              )
-            })}
-          </AnimatePresence>
-        </motion.div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(auto-fill, minmax(${section.key === 'planned' ? '290px' : '330px'}, 1fr))`,
+              gap: section.key === 'planned' ? 12 : 15,
+              alignItems: 'stretch',
+            }}>
+              {section.apps.map((app, i) => (
+                <AppCard key={app.id} app={app} index={i} />
+              ))}
+            </div>
+          </motion.section>
+        ))}
       </main>
 
-      {/* Stats bar */}
-      <motion.div
-        initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-        style={{ borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)', padding: '20px 24px', display: 'flex', justifyContent: 'center', gap: 48, flexWrap: 'wrap', marginBottom: 48 }}>
-        {[
-          { label: 'Live apps', value: String(APPS.filter(a => a.status === 'live').length), icon: Bolt },
-          { label: 'In development', value: String(APPS.filter(a => a.status === 'coming_soon').length), icon: Wrench },
-          { label: 'Planned', value: String(APPS.filter(a => a.status === 'planned').length), icon: Target },
-        ].map((s, i) => (
-          <motion.div key={s.label}
-            initial={{ opacity: 0, y: 6 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            transition={{ delay: i * 0.08, duration: 0.35 }}
-            style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-            <s.icon size={15} style={{ color: 'var(--ink-4)' }} />
-            <p className="text-[15px] font-semibold" style={{ color: 'var(--ink)' }}>{s.value}</p>
-            <p className="text-[10px] uppercase tracking-[0.10em]" style={{ color: 'var(--ink-4)' }}>{s.label}</p>
-          </motion.div>
-        ))}
-      </motion.div>
-
       {/* Footer */}
-      <footer className="flex items-center justify-between" style={{ borderTop: '1px solid var(--line)', padding: '16px 24px', maxWidth: 1100, margin: '0 auto' }}>
-        <p className="text-[11px]" style={{ color: 'var(--ink-4)' }}>
-          &copy; 2026 AKS Forge Lab · FlowForges · <a href="https://flow-forges.com" className="no-underline" style={{ color: 'var(--ink-4)' }}>flow-forges.com</a>
+      <footer style={{
+        borderTop: '1px solid var(--line)',
+        padding: '16px 28px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        maxWidth: 1100, margin: '0 auto',
+      }}>
+        <p style={{ fontSize: 11, color: 'var(--ink-4)' }}>
+          &copy; 2026 AKS Forge Lab · FlowForges ·{' '}
+          <a href="https://flow-forges.com" style={{ color: 'var(--ink-4)', textDecoration: 'none' }}>
+            flow-forges.com
+          </a>
         </p>
-        <p className="text-[11px]" style={{ color: 'var(--ink-4)', fontFamily: 'Geist Mono, monospace' }}>hub v1.0.0</p>
+        <p style={{ fontSize: 11, color: 'var(--ink-4)', fontFamily: 'Geist Mono, monospace' }}>hub v2.0.0</p>
       </footer>
+
     </div>
-  );
+  )
 }
