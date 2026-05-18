@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion'
 import { useState } from 'react'
 import {
   Target, Headphones, PenLine, FileText, Star, ClipboardList,
-  Bolt, Flame, Wrench, ArrowRight
+  Bolt, Mail, Wrench, ArrowRight
 } from 'lucide-react'
 
 interface AppDef {
@@ -22,6 +22,14 @@ const APPS: AppDef[] = [
     status: 'live', icon: Target, badge: 'Live',
     stats: [{ label: 'Leads scored', value: '2,400+' }, { label: 'Avg score', value: '8.5/10' }, { label: 'Plans', value: '$1.5K–$12.5K' }],
     modules: ['AI ICP Scoring', 'Gemini Icebreakers', 'Slack Digest', 'ROI Calculator', 'Client Portal', 'Finance Agent'],
+  },
+  {
+    id: 'mailflow', name: 'MailFlow', tagline: 'AI inbox organizer for Gmail',
+    description: 'Multi-account Gmail digest. AI categorizes urgent, action-needed, FYI and promo emails. Smart auto-archive and one-click reply.',
+    url: '/mailflow', accentColor: 'var(--mf-accent)', glowColor: 'var(--mf-glow)',
+    status: 'live', icon: Mail, badge: 'Live',
+    stats: [{ label: 'AI categories', value: '5' }, { label: 'Multi-account', value: 'Yes' }, { label: 'Daily digest', value: 'Yes' }],
+    modules: ['AI Categorization', 'Smart Archive', 'Draft Reply', 'Daily Digest', 'Gmail OAuth'],
   },
   {
     id: 'support-os', name: 'Support OS', tagline: 'Autonomous customer support agent',
