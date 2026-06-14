@@ -3,7 +3,7 @@ import { motion, useScroll, useSpring } from 'framer-motion'
 import { useState } from 'react'
 import {
   Target, Headphones, PenLine, FileText, Star, ClipboardList,
-  Bolt, Mail, Wrench, ArrowRight,
+  Bolt, Mail, Wrench, ArrowRight, MessageCircle,
 } from 'lucide-react'
 
 interface AppDef {
@@ -22,6 +22,14 @@ const APPS: AppDef[] = [
     status: 'live', icon: Target, badge: 'Live',
     stats: [{ label: 'Leads scored', value: '2,400+' }, { label: 'Avg score', value: '8.5/10' }, { label: 'Plans', value: '$1.5K–$12.5K' }],
     modules: ['AI ICP Scoring', 'Gemini Icebreakers', 'Slack Digest', 'ROI Calculator', 'Client Portal', 'Finance Agent'],
+  },
+  {
+    id: 'rello', name: 'Rello', tagline: 'AI lead qualifier & follow-up system',
+    description: 'Inbound leads qualified via SMS automatically. AI asks the right questions, scores leads 0–100, and follows up cold leads for 7 days — so you never lose a lead to silence.',
+    url: 'https://app.flow-forges.com/rello', accentColor: 'var(--rello-accent)', glowColor: 'var(--rello-glow)',
+    status: 'live', icon: MessageCircle, badge: 'Live',
+    stats: [{ label: 'Response time', value: '< 5s' }, { label: 'Follow-up window', value: '7 days' }, { label: 'Per month', value: '$999' }],
+    modules: ['AI SMS Qualification', 'Lead Scoring', 'Auto Follow-Up', 'Multi-Client Dashboard', 'Twilio Powered'],
   },
   {
     id: 'mailflow', name: 'MailFlow', tagline: 'AI inbox organizer for Gmail',

@@ -30,6 +30,8 @@
   --sow-accent:    #ec4899;
   --mf-accent:     #06b6d4;
   --mf-glow:       rgba(6,182,212,0.15);
+  --rello-accent:  #22c55e;
+  --rello-glow:    rgba(34,197,94,0.15);
 
   font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
